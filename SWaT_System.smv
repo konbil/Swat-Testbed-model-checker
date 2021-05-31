@@ -1,0 +1,191 @@
+MODULE main
+
+VAR 
+    MV101 : boolean;
+    MV201 : boolean;
+    MV301 : boolean;
+    MV203 : boolean;
+    MV302 : boolean;
+    MV303 : boolean;
+    MV304 : boolean;
+    
+
+    P101 : boolean;
+    P203 : boolean;
+    P205 : boolean;
+    P302 : boolean;
+    P602 : boolean;
+
+
+  -- BEDelta means bigger or equal to delta
+  -- SDelta means smaller than delta.
+
+    FIT101 : {BEDelta, SDelta};
+    FIT201 : {BEDelta, SDelta};
+    FIT301 : {BEDelta, SDelta};
+    FIT601 : {BEDelta, SDelta};
+ 
+ASSIGN
+       init(MV101) := {TRUE | FALSE};
+       init(MV201) := {TRUE | FALSE};
+       init(MV301) := {TRUE | FALSE};
+       init(MV302) := {TRUE | FALSE};
+       init(MV303) := {TRUE | FALSE};
+       init(MV304) := {TRUE | FALSE};
+
+       
+       init(P101) := {TRUE | FALSE};
+       init(P203) := {TRUE | FALSE};
+       init(P205) := {TRUE | FALSE};
+       init(P302) := {TRUE | FALSE};
+       init(P602) := {TRUE | FALSE};
+       
+
+       init(FIT101) := {SDelta, BEDelta};
+       init(FIT201) := {SDelta, BEDelta};
+       init(FIT301) := {SDelta, BEDelta};
+       init(FIT601) := {SDelta, BEDelta};
+
+        
+        next(MV101) := case
+                  (P602=TRUE | MV301=TRUE | FIT101=BEDelta | FIT601=BEDelta | MV303=TRUE | FIT301=SDelta | MV302=FALSE | MV304=FALSE | P302=FALSE) : MV101=TRUE;
+                   FIT101=SDelta : MV101=FALSE ;
+                      
+                      TRUE : MV101;
+					  FALSE : MV101;
+                      esac;
+       next(MV201) := case
+                     (P101=TRUE | P203=TRUE | P205=TRUE | FIT201=BEDelta) : MV201=TRUE;
+                      TRUE : MV201;
+                      esac;
+
+        next(MV301) := case
+                     (P602=TRUE | MV101=TRUE | MV303=TRUE | MV302=FALSE | MV304=FALSE  | FIT101=BEDelta | FIT301=SDelta | P302=FALSE ) : MV301=TRUE;
+                      (MV304=TRUE | MV101=FALSE | MV302=TRUE | MV301=FALSE | MV303=FALSE | P302=TRUE | FIT101=SDelta | FIT301=BEDelta | FIT601=SDelta | P602=FALSE) : MV301=FALSE;
+      
+                      TRUE : MV301;
+                      esac;
+
+        next(MV302) := case
+                      (P602=TRUE | P302=FALSE | MV101=TRUE | MV301=TRUE | MV303=TRUE | MV304=FALSE | FIT601=BEDelta | FIT301=SDelta | FIT101=BEDelta) : MV302=FALSE ;
+                      TRUE : MV302;
+                      esac;
+   
+
+       next(MV303) := case
+                      (MV101=FALSE | MV302=TRUE | MV301=FALSE | FIT101=SDelta | FIT301=BEDelta | FIT601=SDelta | P602=FALSE) : MV303=FALSE;
+                      (FIT601=BEDelta | FIT101=BEDelta | FIT301=SDelta | MV101=TRUE | MV302=FALSE | MV304=FALSE | P302=FALSE) : MV303=TRUE;
+                     TRUE : MV303;
+                      esac;
+
+        next(MV304) := case
+                       (P602=TRUE | P302=FALSE | MV101=TRUE | MV301=TRUE | MV302=FALSE | MV303=TRUE | FIT101=BEDelta | FIT301=SDelta | FIT601=BEDelta) : MV304=FALSE;
+                      TRUE : MV304;
+                      esac;
+
+        next(P101) := case
+                     (MV201=FALSE | P203=FALSE | P205=FALSE) : P101=FALSE ;
+                      TRUE : P101;
+                      esac;
+ 
+        next(P203) := case
+                      (P205=FALSE | P101=FALSE | MV201=FALSE | FIT201=SDelta) : P203=FALSE   ;
+                      TRUE : P203;
+                      esac;
+
+       next(P205) := case
+                     (MV201=FALSE | P101=FALSE | P203=FALSE | FIT201=SDelta) : P205=FALSE ;
+                      (MV203=TRUE | P203=TRUE | FIT201=BEDelta) : P205=TRUE ;
+                      TRUE : P205;
+                      esac;
+
+       next(P302) := case
+                      (P602=TRUE  | MV101=TRUE | MV301=TRUE | MV302=FALSE | MV303=TRUE | MV304=FALSE | FIT101=BEDelta | FIT301=SDelta | FIT601=BEDelta) : P302=FALSE;
+                      TRUE : P302;
+                      esac;
+
+       next(P602) := case
+                       (MV301=FALSE | MV304=TRUE | MV101=FALSE | MV302=TRUE | MV303=FALSE | P302=TRUE | FIT101=SDelta | FIT301=BEDelta | FIT601=SDelta) : P602=FALSE;
+                     TRUE : P602;
+                    esac;
+
+      
+       next(FIT101) := case
+                      (P602=TRUE | P302=FALSE | MV101=TRUE | MV301=TRUE | MV303=TRUE | MV302=FALSE | MV304=FALSE | FIT601=BEDelta | FIT301=SDelta) : {BEDelta};
+                      TRUE: FIT101;
+                      esac;
+
+       next(FIT201) := case
+                          (P205=TRUE) : {BEDelta};
+                        TRUE: FIT201;
+                        esac;
+
+       next(FIT301) := case
+                         (P602=TRUE | P302=FALSE | MV101=TRUE | MV301=TRUE | MV302=FALSE | MV303=TRUE | MV304=FALSE | FIT101=BEDelta | FIT601=BEDelta) : {SDelta};
+                          (MV302=TRUE | MV301=FALSE | MV303=FALSE | FIT601=SDelta | P602=FALSE) : {BEDelta};
+                        TRUE : FIT301;
+                         esac;
+
+       next(FIT601) := case
+                       (MV304=TRUE | MV101=FALSE | MV301=FALSE | MV302=TRUE | MV303=FALSE | P302=TRUE | FIT101=SDelta | FIT301=BEDelta) : {SDelta};
+                       TRUE: FIT601;
+                       esac;
+
+
+       --LTLSPEC specifications
+      LTLSPEC  G(P602=FALSE & MV301=FALSE & FIT101=SDelta & FIT601=SDelta & MV303=FALSE & FIT301=BEDelta & MV302=FALSE & MV304=FALSE & P302=FALSE) -> F(MV101=FALSE)
+	  LTLSPEC  G(P602=FALSE & MV301=FALSE & FIT101=SDelta & FIT601=SDelta & MV303=FALSE & FIT301=SDelta & MV302=TRUE & MV304=FALSE & P302=FALSE) -> F(MV101=FALSE)
+	 -- LTLSPEC  G(FIT101=SDelta -> F MV101=FALSE)
+      LTLSPEC  G(P101=FALSE & P203=FALSE & P205=FALSE & FIT201=SDelta) -> F (MV201=FALSE)  
+	  LTLSPEC  G(P101=TRUE & P203=TRUE & P205=TRUE & FIT201=BEDelta) -> F (MV201=TRUE)
+      LTLSPEC  G(P602=FALSE & MV101=FALSE & MV303=FALSE & MV302=FALSE & MV304=FALSE  & FIT101=SDelta & FIT301=BEDelta & P302=FALSE ) -> F(MV301=FALSE) 
+	  LTLSPEC  G(P602=FALSE & P302=FALSE & MV101=FALSE & MV301=FALSE & MV303=FALSE & MV304=TRUE & FIT601=SDelta & FIT301=BEDelta & FIT101=SDelta) -> F (MV302=FALSE)
+      LTLSPEC  G(P602=FALSE & P302=FALSE & MV101=FALSE & MV301=FALSE & MV303=FALSE & MV304=TRUE & FIT601=SDelta & FIT301=BEDelta & FIT101=SDelta) -> F (MV302=TRUE)	  
+	  LTLSPEC  G(MV101=FALSE & MV302=FALSE & MV301=FALSE & FIT101=SDelta & FIT301=BEDelta & FIT601=SDelta & P602=FALSE) -> F(MV303=FALSE)
+      LTLSPEC  G(FIT601=SDelta & FIT101=SDelta & FIT301=BEDelta & MV101=FALSE & MV302=TRUE & MV304=TRUE & P302=FALSE) -> F (MV303=FALSE)
+	  LTLSPEC  G(P602=TRUE & P302=TRUE & MV101=TRUE & MV301=TRUE & MV302=TRUE & MV303=TRUE & FIT101=SDelta & FIT301=BEDelta & FIT601=SDelta) -> F (MV304=FALSE)
+	  LTLSPEC  G(P602=TRUE & P302=TRUE & MV101=TRUE & MV301=TRUE & MV302=TRUE & MV303=TRUE & FIT101=SDelta & FIT301=BEDelta & FIT601=SDelta) -> F (MV304=TRUE)
+	  LTLSPEC  G(MV201={TRUE | FALSE} & P203=TRUE & P205=TRUE) -> F(P101=TRUE);
+	  LTLSPEC  G(P205=TRUE & P101=TRUE & MV201={TRUE | FALSE} & FIT201=BEDelta) -> F (P203=TRUE) 
+	  LTLSPEC  G(MV201={TRUE | FALSE} & P101=TRUE & P203=TRUE & FIT201=BEDelta) -> F (P205=TRUE)
+	  LTLSPEC  G(P602=TRUE  & MV101={TRUE | FALSE} & MV301={TRUE | FALSE}& MV302={TRUE | FALSE}& MV303={TRUE | FALSE} & MV304={TRUE | FALSE} & FIT101=SDelta & FIT301=BEDelta & FIT601=SDelta) -> F(P302=TRUE)
+	  LTLSPEC  G(MV301={TRUE | FALSE} & MV304={TRUE | FALSE} & MV101={TRUE | FALSE} & MV302={TRUE | FALSE} & MV303={TRUE | FALSE} & P302=TRUE & FIT101=SDelta & FIT301=BEDelta & FIT601=SDelta) -> F(P602=TRUE)
+	  LTLSPEC  G(P602=TRUE & P302=TRUE & MV101={TRUE | FALSE} & MV301={TRUE | FALSE} & MV303={TRUE | FALSE} & MV302={TRUE | FALSE} & MV304={TRUE | FALSE} & FIT601=SDelta & FIT301=BEDelta) -> F(FIT101=BEDelta)
+      LTLSPEC  G(P205=TRUE) -> F(FIT201=BEDelta)  
+ 	  LTLSPEC  G(P602=TRUE & P302=TRUE & MV101={TRUE | FALSE} & MV301={TRUE | FALSE} & MV302={TRUE | FALSE} & MV303={TRUE | FALSE} & MV304={TRUE | FALSE} & FIT101=SDelta & FIT601=SDelta) -> F (FIT301=SDelta)
+	  LTLSPEC  G(MV302={TRUE | FALSE} & MV301={TRUE | FALSE} & MV303={TRUE | FALSE} & FIT601=SDelta & P602=TRUE) -> F(FIT301=BEDelta)
+	  LTLSPEC  G(MV304={TRUE | FALSE} & MV101={TRUE | FALSE} & MV301={TRUE | FALSE} & MV302={TRUE | FALSE} & MV303={TRUE | FALSE} & P302=TRUE & FIT101=SDelta & FIT301=BEDelta) -> F(FIT601=SDelta)
+	  
+	  
+	  
+	  
+     --CTL specifications
+      SPEC  AG(P602=TRUE & MV301=TRUE & FIT101=SDelta & FIT601=SDelta & MV303=TRUE & FIT301=BEDelta & MV302=TRUE & MV304=TRUE & P302=TRUE) -> AF(MV101=TRUE)
+	  SPEC  AG(P602=TRUE & MV301=TRUE & FIT101=SDelta & FIT601=SDelta & MV303=TRUE & FIT301=SDelta & MV302=TRUE & MV304=TRUE & P302=TRUE) -> AF(MV101=FALSE)
+	  SPEC AG(FIT101=BEDelta -> AF MV101=TRUE)
+      SPEC AG(P101=TRUE & P203=TRUE & P205=TRUE & FIT201=BEDelta) -> AF (MV201=TRUE)  
+      SPEC AG(P602=TRUE & MV101=TRUE & MV303=TRUE & MV302=TRUE & MV304=TRUE  & FIT101=SDelta & FIT301=BEDelta & P302=TRUE ) -> AF(MV301=TRUE) 
+	  SPEC AG(P602=TRUE & P302=TRUE & MV101=TRUE & MV301=TRUE & MV303=TRUE & MV304=TRUE & FIT601=SDelta & FIT301=BEDelta & FIT101=SDelta) -> AF (MV302=FALSE)
+      SPEC AG(P602=TRUE & P302=TRUE & MV101=TRUE & MV301=TRUE & MV303=TRUE & MV304=TRUE & FIT601=SDelta & FIT301=BEDelta & FIT101=SDelta) -> AF (MV302=TRUE)	  
+	  SPEC AG(MV101=TRUE & MV302=TRUE & MV301={FALSE | TRUE } & FIT101=SDelta & FIT301=BEDelta & FIT601=SDelta & P602=TRUE) -> AF(MV303=FALSE)
+      SPEC AG(FIT601=SDelta & FIT101=SDelta & FIT301=BEDelta & MV101=TRUE & MV302=TRUE & MV304=TRUE & P302=TRUE) -> AF (MV303=TRUE)
+	  SPEC AG(P602=TRUE & P302=TRUE & MV101=TRUE & MV301=TRUE & MV302=TRUE & MV303=TRUE & FIT101=SDelta & FIT301=BEDelta & FIT601=SDelta) -> AF (MV304=FALSE)
+	  SPEC AG(P602=TRUE & P302=TRUE & MV101=TRUE & MV301=TRUE & MV302=TRUE & MV303=TRUE & FIT101=SDelta & FIT301=BEDelta & FIT601=SDelta) -> AF (MV304=TRUE)
+	  SPEC AG(MV201={TRUE | FALSE} & P203=TRUE & P205=TRUE) -> AF(P101=TRUE);
+	  SPEC AG(P205=TRUE & P101=TRUE & MV201={TRUE | FALSE} & FIT201=BEDelta) -> AF (P203=TRUE) 
+	  SPEC AG(MV201={TRUE | FALSE} & P101=TRUE & P203=TRUE & FIT201=BEDelta) -> AF (P205=TRUE)
+	  SPEC AG(P602=TRUE  & MV101={TRUE | FALSE} & MV301={TRUE | FALSE}& MV302={TRUE | FALSE}& MV303={TRUE | FALSE} & MV304={TRUE | FALSE} & FIT101=SDelta & FIT301=BEDelta & FIT601=SDelta) -> AF(P302=TRUE)
+	  SPEC AG(MV301={TRUE | FALSE} & MV304={TRUE | FALSE} & MV101={TRUE | FALSE} & MV302={TRUE | FALSE} & MV303={TRUE | FALSE} & P302=TRUE & FIT101=SDelta & FIT301=BEDelta & FIT601=SDelta) -> AF (P602=TRUE)
+	  SPEC AG(P602=TRUE & P302=TRUE & MV101={TRUE | FALSE} & MV301={TRUE | FALSE} & MV303={TRUE | FALSE} & MV302={TRUE | FALSE} & MV304={TRUE | FALSE} & FIT601=SDelta & FIT301=BEDelta) -> AF(FIT101=BEDelta)
+      SPEC AG(P205=TRUE) -> AF(FIT201=BEDelta)  
+ 	  SPEC AG(P602=TRUE & P302=TRUE & MV101={TRUE | FALSE} & MV301={TRUE | FALSE} & MV302={TRUE | FALSE} & MV303={TRUE | FALSE} & MV304={TRUE | FALSE} & FIT101=SDelta & FIT601=SDelta) -> AF (FIT301=SDelta)
+	  SPEC AG(MV302={TRUE | FALSE} & MV301={TRUE | FALSE} & MV303={TRUE | FALSE} & FIT601=SDelta & P602=TRUE) -> AF(FIT301=BEDelta)
+	  SPEC AG(MV304={TRUE | FALSE} & MV101={TRUE | FALSE} & MV301={TRUE | FALSE} & MV302={TRUE | FALSE} & MV303={TRUE | FALSE} & P302=TRUE & FIT101=SDelta & FIT301=BEDelta) -> AF(FIT601=SDelta)
+	 
+    
+
+
+
+    
+    
+
